@@ -1,0 +1,4 @@
+Title,URL,Username,Password,Notes,OTPAuth
+"one","http://one.domain.com","OneUser","OnePass","The first one",""
+"two","http://two.domain.com","TwoUser","TwoPass","The second one",""
+"err","Should be an error"

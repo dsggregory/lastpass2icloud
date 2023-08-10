@@ -1,0 +1,5 @@
+url,username,password,extra,name,grouping,fav
+"http://one.domain.com","OneUser","OnePass","One comment","","",""
+"http://two.domain.com","TwoUser","Two---Pass","Two comment diff pass from safari","","",""
+"http://three.domain.com","ThreeUser","ThreePass","Three comment","","",""
+"err","OneUser","OnePass",
