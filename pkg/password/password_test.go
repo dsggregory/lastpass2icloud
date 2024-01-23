@@ -11,7 +11,7 @@ func TestSafari(t *testing.T) {
 		plist, err := LoadSafariPasswords("../../testdata/safari.csv")
 		So(err, ShouldBeNil)
 		So(len(plist), ShouldEqual, 3)
-		So(plist[0].Href, ShouldEqual, "http://one.domain.com")
+		So(plist[0].BaseHref, ShouldEqual, "http://one.domain.com")
 	})
 }
 
@@ -20,7 +20,7 @@ func TestLastpass(t *testing.T) {
 		plist, err := LoadLastpassPasswords("../../testdata/lastpass.csv")
 		So(err, ShouldBeNil)
 		So(len(plist), ShouldEqual, 4)
-		So(plist[0].Href, ShouldEqual, "http://one.domain.com")
+		So(plist[0].BaseHref, ShouldEqual, "http://one.domain.com")
 	})
 }
 
@@ -29,7 +29,7 @@ func TestDiff(t *testing.T) {
 		conflicts, err := DoDiff("../../testdata/safari.csv", "../../testdata/lastpass.csv")
 		So(err, ShouldBeNil)
 		for _, p := range conflicts {
-			fmt.Print(p.String())
+			fmt.Print(p.ToJSON())
 		}
 	})
 }

@@ -9,17 +9,19 @@ import (
 
 func main() {
 	var lastpCSV, safariCSV, out string
+	var fmtSafari bool
 
 	flag.StringVar(&lastpCSV, "lastp", "", "Path to LastPass CSV export file")
 	flag.StringVar(&safariCSV, "safari", "", "Path to Safari passwords CSV export file")
 	flag.StringVar(&out, "o", "-", "Path to store differences, - is stdout")
+	flag.BoolVar(&fmtSafari, "fs", false, "Format output as Safari importable CSV")
 	flag.Parse()
 
 	var outfp *os.File
 	if out == "-" {
 		outfp = os.Stdout
 	} else {
-		fp, err := os.OpenFile(out, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+		fp, err := os.OpenFile(out, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			panic(err)
 		}
@@ -32,7 +34,13 @@ func main() {
 	}
 
 	fmt.Printf("Found %d conflicts\n", len(conflicts))
-	for _, p := range conflicts {
-		_, _ = outfp.WriteString(p.String())
+	if !fmtSafari {
+		for _, p := range conflicts {
+			_, _ = outfp.WriteString(p.ToJSON())
+		}
+	} else {
+		if err := password.ExportSafariPasswords(conflicts, outfp); err != nil {
+			panic(err)
+		}
 	}
 }

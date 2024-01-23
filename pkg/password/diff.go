@@ -1,17 +1,21 @@
 package password
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
 type PassMap map[string]Passwords
 
 func passwordsToMap(passwords Passwords) PassMap {
 	m := make(PassMap, len(passwords))
 	for _, p := range passwords {
-		ep, ok := m[p.Href]
+		ep, ok := m[p.BaseHref]
 		if !ok {
-			m[p.Href] = Passwords{p}
+			m[p.BaseHref] = Passwords{p}
 		} else {
-			m[p.Href] = append(ep, p)
+			m[p.BaseHref] = append(ep, p)
 		}
 	}
 
@@ -20,7 +24,7 @@ func passwordsToMap(passwords Passwords) PassMap {
 
 func (pws Passwords) OLookup(href string) *Password {
 	for _, p := range pws {
-		if p.Href == href {
+		if p.BaseHref == href {
 			return p
 		}
 	}
@@ -50,26 +54,36 @@ func DoDiff(safariCSV string, lastpassCSV string) (Passwords, error) {
 		}
 		spa, ok := safariMap[nm]
 		if !ok {
-			lp.Err = &PassErr{0, fmt.Errorf("%s; lastpass entry not in safari", lp.Href)}
+			lp.Err = &PassErr{0, fmt.Errorf("%s; lastpass entry not in safari", lp.BaseHref)}
 			conflicts = append(conflicts, lp)
-			//lk := safari.OLookup(lp.Href)
+			//lk := safari.OLookup(lp.BaseHref)
 			//fmt.Println(lk)
 			continue
 		}
 		// compare user/pass
 		found := false
+		screds := []string{}
 		for _, sp := range spa {
 			if sp.User == lp.User && sp.Pass == lp.Pass {
 				found = true
 				break
 			}
+			screds = append(screds, sp.User+"/"+sp.Pass+":"+fmt.Sprintf("%d", sp.PwSrc.Offset))
 		}
 		if !found {
-			lp.Err = &PassErr{0, fmt.Errorf("u=%s, p=%s; lastpass entry mismatch", lp.User, lp.Pass)}
+			lp.Err = &PassErr{0, fmt.Errorf("screds=%v; lastpass entry mismatch", screds)}
 			conflicts = append(conflicts, lp)
 			continue
 		}
 	}
+
+	sort.Slice(conflicts, func(i, j int) bool {
+		x := strings.Compare(conflicts[i].OrigHref, conflicts[j].OrigHref)
+		if x < 0 {
+			return true
+		}
+		return false
+	})
 
 	return conflicts, nil
 }
